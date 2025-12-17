@@ -43,19 +43,26 @@ class VkApi:
                 self.longpoll_ts = data['ts']
             return data.get('updates', [])
 
-    async def send_message(self, user_id, message, keyboard=None):
+    async def send_message(self,
+                           user_id,
+                           message,
+                           keyboard = None,
+        ):
         url = 'https://api.vk.com/method/messages.send'
         params = {
             'access_token': self.token,
             'v': '5.199',
             'user_id': user_id,
             'message': message,
-            'random_id': 0
+            'random_id': 0,
+            'group_id': self.group_id,
         }
         if keyboard:
             params['keyboard'] = json.dumps(keyboard)
-        async with self.session.get(url, params=params, proxy=self.proxy) as response:
-            return await response.json()
+
+        response = await self.session.get(url, params=params, proxy=self.proxy)
+        a = response.url
+        return await response.json()
 
     async def close(self):
         await self.session.close()
