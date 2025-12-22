@@ -19,7 +19,7 @@ async def main():
         for update in updates:
             event: NewMessageEvent = EventParser.parse(update)
             if event.code == 4:
-                answer = await vk.send_message(event.extra_fields[0], 'Hello, ' + event.extra_fields[2])
+                answer = await vk.send_message(event.peer_id, 'Hello, ' + event.extra_fields[2])
                 print(answer)
 
 if __name__ == "__main__":

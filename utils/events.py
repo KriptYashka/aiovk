@@ -1,3 +1,7 @@
+"""
+Документация VK событий: https://dev.vk.com/ru/api/user-long-poll/getting-started#Дополнительные%20поля%20сообщений
+"""
+
 import time
 from dataclasses import dataclass
 from typing import Any
@@ -79,12 +83,15 @@ class MessageFlagsResetEvent(MessageFlagsEvent):
 
 @dataclass
 class NewMessageEvent(BaseEvent):
+    """
+    По документации поля другие.
+    """
     code = 4
     description = "Добавление нового сообщения"
 
     message_id: int
     flags: int
-    minor_id: int
+    peer_id: int
     extra_fields: list[Any]
 
     @classmethod
@@ -94,7 +101,7 @@ class NewMessageEvent(BaseEvent):
             description=cls.description,
             message_id=data[0],
             flags=data[1],
-            minor_id=data[2],
+            peer_id=data[2],
             extra_fields=data[3:]
         )
 
