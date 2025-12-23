@@ -1,16 +1,5 @@
-# -*- coding: utf-8 -*-
-"""
-:authors: python273
-:license: Apache License, Version 2.0, see LICENSE file
-
-:copyright: (c) 2019 python273
-"""
-
-from collections import defaultdict
 from datetime import datetime
 from enum import IntEnum
-
-import requests
 
 CHAT_START_ID = int(2E9)  # id с которого начинаются беседы
 
@@ -26,17 +15,17 @@ class VkLongpollMode(IntEnum):
     GET_ATTACHMENTS = 2
 
     #: Возвращать расширенный набор событий
-    GET_EXTENDED = 2**3
+    GET_EXTENDED = 2 ** 3
 
     #: возвращать pts для метода `messages.getLongPollHistory`
-    GET_PTS = 2**5
+    GET_PTS = 2 ** 5
 
     #: В событии с кодом 8 (друг стал онлайн) возвращать
     #: дополнительные данные в поле `extra`
-    GET_EXTRA_ONLINE = 2**6
+    GET_EXTRA_ONLINE = 2 ** 6
 
     #: Возвращать поле `random_id`
-    GET_RANDOM_ID = 2**7
+    GET_RANDOM_ID = 2 ** 7
 
 
 DEFAULT_MODE = sum(VkLongpollMode)
@@ -181,35 +170,35 @@ class VkMessageFlag(IntEnum):
     OUTBOX = 2
 
     #: На сообщение был создан ответ.
-    REPLIED = 2**2
+    REPLIED = 2 ** 2
 
     #: Помеченное сообщение.
-    IMPORTANT = 2**3
+    IMPORTANT = 2 ** 3
 
     #: Сообщение отправлено через чат.
-    CHAT = 2**4
+    CHAT = 2 ** 4
 
     #: Сообщение отправлено другом.
     #: Не применяется для сообщений из групповых бесед.
-    FRIENDS = 2**5
+    FRIENDS = 2 ** 5
 
     #: Сообщение помечено как "Спам".
-    SPAM = 2**6
+    SPAM = 2 ** 6
 
     #: Сообщение удалено (в корзине).
-    DELETED = 2**7
+    DELETED = 2 ** 7
 
     #: Сообщение проверено пользователем на спам.
-    FIXED = 2**8
+    FIXED = 2 ** 8
 
     #: Сообщение содержит медиаконтент
-    MEDIA = 2**9
+    MEDIA = 2 ** 9
 
     #: Приветственное сообщение от сообщества.
-    HIDDEN = 2**16
+    HIDDEN = 2 ** 16
 
     #: Сообщение удалено для всех получателей.
-    DELETED_ALL = 2**17
+    DELETED_ALL = 2 ** 17
 
 
 class VkPeerFlag(IntEnum):
@@ -260,7 +249,6 @@ MESSAGE_EXTRA_FIELDS = [
     'peer_id', 'timestamp', 'text', 'extra_values', 'attachments', 'random_id'
 ]
 MSGID = 'message_id'
-
 EVENT_ATTRS_MAPPING = {
     VkEventType.MESSAGE_FLAGS_REPLACE: [MSGID, 'flags'] + MESSAGE_EXTRA_FIELDS,
     VkEventType.MESSAGE_FLAGS_SET: [MSGID, 'mask'] + MESSAGE_EXTRA_FIELDS,
@@ -305,7 +293,6 @@ def get_all_event_attrs():
 
 
 ALL_EVENT_ATTRS = get_all_event_attrs()
-
 PARSE_PEER_ID_EVENTS = [
     k for k, v in EVENT_ATTRS_MAPPING.items() if 'peer_id' in v
 ]
@@ -389,7 +376,7 @@ class Event(object):
                 self.user_id = self.user_id[0]
 
         if self.timestamp:
-            self.datetime = datetime.utcfromtimestamp(self.timestamp)
+            self.datetime = datetime.fromtimestamp(self.timestamp)
 
     def _list_to_attr(self, raw, attrs):
         for i in range(min(len(raw), len(attrs))):
@@ -462,150 +449,19 @@ class Event(object):
                               VkChatEventType.ADMIN_REMOVED.value]:
             self.info = {'user_id': self.info}
 
+    def __str__(self):
+        parts = [
+            f"Event {self.type:>3}",
+        ]
+        if self.timestamp:
+            parts.insert(0, f"{datetime.fromtimestamp(self.timestamp).strftime('%H:%M:%S')}")
+        if self.type in PARSE_PEER_ID_EVENTS:
+            parts.append(f"Peer ID: {self.peer_id:>10}")
+        if self.type is VkEventType.MESSAGE_NEW:
+            parts.append("USER" if self.from_user else "CHAT")
+            parts.append(self.text)
 
-class VkLongPoll(object):
-    """ Класс для работы с longpoll-сервером
+        return " | ".join(parts)
 
-    `Подробнее в документации VK API <https://vk.ru/dev/using_longpoll>`__.
-
-    :param vk: объект :class:`VkApi`
-    :param wait: время ожидания
-    :param mode: дополнительные опции ответа
-    :param preload_messages: предзагрузка данных сообщений для
-        получения ссылок на прикрепленные файлы
-    :param group_id: идентификатор сообщества
-        (для сообщений сообщества с ключом доступа пользователя)
-    """
-
-    __slots__ = (
-        'vk', 'wait', 'mode', 'preload_messages', 'group_id',
-        'url', 'session',
-        'key', 'server', 'ts', 'pts'
-    )
-
-    #: Класс для событий
-    DEFAULT_EVENT_CLASS = Event
-
-    #: События, для которых можно загрузить данные сообщений из API
-    PRELOAD_MESSAGE_EVENTS = [
-        VkEventType.MESSAGE_NEW,
-        VkEventType.MESSAGE_EDIT
-    ]
-
-    def __init__(self, vk, wait=25, mode=DEFAULT_MODE,
-                 preload_messages=False, group_id=None):
-        self.vk = vk
-        self.wait = wait
-        self.mode = mode.value if isinstance(mode, VkLongpollMode) else mode
-        self.preload_messages = preload_messages
-        self.group_id = group_id
-
-        self.url = None
-        self.key = None
-        self.server = None
-        self.ts = None
-        self.pts = None
-
-        self.session = requests.Session()
-
-        self.update_longpoll_server()
-
-    def _parse_event(self, raw_event):
-        return self.DEFAULT_EVENT_CLASS(raw_event)
-
-    def update_longpoll_server(self, update_ts=True):
-        values = {
-            'lp_version': '3',
-            'need_pts': 1
-        }
-        if self.group_id:
-            values['group_id'] = self.group_id
-
-        response = self.vk.method('messages.getLongPollServer', values)
-        self.key = response['key']
-        self.server = response['server']
-
-        self.url = f'https://{self.server}'
-
-        if update_ts:
-            self.ts = response['ts']
-            self.pts = response.get('pts')
-
-    def check(self):
-        """ Получить события от сервера один раз
-
-        :returns: `list` of :class:`Event`
-        """
-        values = {
-            'act': 'a_check',
-            'key': self.key,
-            'ts': self.ts,
-            'wait': self.wait,
-            'mode': self.mode,
-            'version': 3
-        }
-
-        response = self.session.get(
-            self.url,
-            params=values,
-            timeout=self.wait + 10
-        ).json()
-
-        if 'failed' not in response:
-            self.ts = response['ts']
-            self.pts = response.get('pts')
-
-            events = [
-                self._parse_event(raw_event)
-                for raw_event in response['updates']
-            ]
-
-            if self.preload_messages:
-                self.preload_message_events_data(events)
-
-            return events
-
-        elif response['failed'] == 1:
-            self.ts = response['ts']
-
-        elif response['failed'] == 2:
-            self.update_longpoll_server(update_ts=False)
-
-        elif response['failed'] == 3:
-            self.update_longpoll_server()
-
-        return []
-
-    def preload_message_events_data(self, events):
-        """ Предзагрузка данных сообщений из API
-
-        :type events: list of Event
-        """
-        message_ids = set()
-        event_by_message_id = defaultdict(list)
-
-        for event in events:
-            if event.type in self.PRELOAD_MESSAGE_EVENTS:
-                message_ids.add(event.message_id)
-                event_by_message_id[event.message_id].append(event)
-
-        if not message_ids:
-            return
-
-        messages_data = self.vk.method(
-            'messages.getById',
-            {'message_ids': message_ids}
-        )
-
-        for message in messages_data['items']:
-            for event in event_by_message_id[message['id']]:
-                event.message_data = message
-
-    def listen(self):
-        """ Слушать сервер
-
-        :yields: :class:`Event`
-        """
-
-        while True:
-            yield from self.check()
+    def __repr__(self):
+        return self.__str__()
