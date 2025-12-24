@@ -2,8 +2,12 @@ import asyncio
 import logging
 
 from config import Config
-from core.longpool import VkLongPoll
+
+from core.bot_longpool import VkBotLongPoll
+from core.user_longpool import VkLongPoll
 from core.vk_api import VkApi
+
+from routers.main_router import router as main_router
 
 
 async def main():
@@ -14,14 +18,17 @@ async def main():
         config.proxy,
         '5.199'
     )
-    server = VkLongPoll(
+    server = VkBotLongPoll(
         vk,
         group_id=config.group_id
     )
+    # event_handler = EventHandler()
     await server.update_longpoll_server()
     while True:
         events = await server.get_events()
-        print(events)
+        for event in events:
+            await main_router.propagate_event(event.type.value, event)
+        # await event_handler.handle(events)
 
 
 if __name__ == "__main__":

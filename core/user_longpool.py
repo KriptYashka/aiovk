@@ -6,7 +6,7 @@ import aiohttp
 from aiohttp.web_exceptions import HTTPError
 
 from config import Config
-from core.events import VkLongpollMode, DEFAULT_MODE, VkEventType, Event
+from core.user_events import VkLongpollMode, DEFAULT_MODE, VkEventType, Event
 from core.vk_api import VkApi
 
 
@@ -89,6 +89,8 @@ class VkLongPoll(object):
 
         :returns: `list` of :class:`Event`
         """
+        if not self.url:
+            raise RuntimeError('Longpoll server not initialized (update)')
         values = {
             'act': 'a_check',
             'key': self.key,
