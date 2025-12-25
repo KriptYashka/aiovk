@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import Any, Final, Generator, List, Optional
 
-from core.bot_longpool import VkBotEvent, VkBotEventType
-from core.event.observer import EventObserver
-from core.responce import ResponseStatus
+from core.bot.bot_events import VkBotEventType, VkBotEvent
+from core.handlers.observer import EventObserver
+from core.handlers.responce import ResponseStatus
 
 INTERNAL_UPDATE_TYPES: Final[frozenset[str]] = frozenset({"update", "error"})
 

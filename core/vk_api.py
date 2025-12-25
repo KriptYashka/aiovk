@@ -3,6 +3,8 @@ import time
 
 import aiohttp
 
+from core.limits import VkLimits
+
 
 class VkApi:
     """
@@ -14,7 +16,7 @@ class VkApi:
         self.proxy = proxy
         self.v = v
 
-        self.RPS_DELAY = (1 / 20) if is_group_token else (1 / 3)
+        self.RPS_DELAY = VkLimits.GROUP_MESSAGE_LIMIT if is_group_token else VkLimits.USER_MESSAGE_LIMIT
         self.last_request_dt = time.time()
 
         self.session = aiohttp.ClientSession()

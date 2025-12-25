@@ -1,9 +1,9 @@
 from typing import Callable, Any, Optional
 
-from core.event.base_filter import Filter
-from core.event.handler import HandlerObject, FilterObject
-from core.bot_longpool import VkBotEvent
-from core.responce import ResponseStatus
+from core.handlers.base_filter import Filter
+from core.handlers.handler import HandlerObject, FilterObject
+from core.bot.bot_events import VkBotEvent
+from core.handlers.responce import ResponseStatus
 
 CallbackType = Callable[..., Any]  # Повторяется 2 раза в проекте
 

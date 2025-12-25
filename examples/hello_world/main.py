@@ -3,8 +3,9 @@ import logging
 
 from config import Config
 
-from core.bot_longpool import VkBotLongPoll, VkBotEvent
-from core.dispatcher import dispatcher
+from core.bot.bot_longpool import VkBotLongPoll
+from core.bot.bot_events import VkBotEvent
+from examples.hello_world.dispatcher import dispatcher
 from core.vk_api import VkApi
 
 async def main():

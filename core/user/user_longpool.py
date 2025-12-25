@@ -1,12 +1,10 @@
-import asyncio
 import logging
 from collections import defaultdict
 
 import aiohttp
 from aiohttp.web_exceptions import HTTPError
 
-from config import Config
-from core.user_events import VkLongpollMode, DEFAULT_MODE, VkEventType, Event
+from core.user.user_events import VkLongpollMode, DEFAULT_MODE, VkEventType, Event
 from core.vk_api import VkApi
 
 

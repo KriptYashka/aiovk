@@ -7,7 +7,7 @@ from typing import Callable, Any
 
 from magic_filter import MagicFilter
 
-from core.event.base_filter import Filter
+from core.handlers.base_filter import Filter
 
 CallbackType = Callable[..., Any]
 
