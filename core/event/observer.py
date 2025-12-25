@@ -3,6 +3,7 @@ from typing import Callable, Any, Optional
 from core.event.base_filter import Filter
 from core.event.handler import HandlerObject, FilterObject
 from core.bot_longpool import VkBotEvent
+from core.responce import ResponseStatus
 
 CallbackType = Callable[..., Any]  # Повторяется 2 раза в проекте
 
@@ -57,13 +58,19 @@ class EventObserver:
     def check_root_filters(self, event: VkBotEvent, **kwargs: Any) -> Any:
         return self._handler.check(event, **kwargs)
 
-    async def trigger(self, *args: Any, **kwargs: Any) -> None:
+    async def trigger(self, event: VkBotEvent, *args, **kwargs: Any) -> Optional[int]:
         """
         Передайте событие обработчикам.
         Обработчик будет вызван, когда будут пройдены все его фильтры.
         """
         for handler in self.handlers:
-            await handler.call(*args, **kwargs)
+            kwargs["handler"] = handler
+            result, data = await handler.check(event, **kwargs)
+            if result:
+                kwargs.update(data)
+                return await handler.call(event, *args, **kwargs)
+
+        return ResponseStatus.UNHANDLED
 
     def __call__(
             self,

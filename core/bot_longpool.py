@@ -7,9 +7,13 @@
 """
 import logging
 from enum import Enum
+from typing import Optional
 
 import aiohttp
 from aiohttp.web_exceptions import HTTPError
+
+from core.keyboards import VkKeyboard
+from core.vk_api import VkApi
 
 CHAT_START_ID = int(2E9)
 
@@ -112,14 +116,15 @@ class VkBotEvent(object):
         't', 'type',
         'obj', 'object',
         'client_info', 'message',
-        'group_id'
+        'group_id', 'vk'
     )
 
     def __init__(self, raw):
         self.raw = raw
+        self.vk: Optional[VkApi] = None  # Поле для VK API
 
         try:
-            self.type = VkBotEventType(raw['type'])
+            self.type = VkBotEventType(raw['type']).value
         except ValueError:
             self.type = raw['type']
 
@@ -158,7 +163,7 @@ class VkBotMessageEvent(VkBotEvent):
     :vartype chat_id: int
     """
 
-    __slots__ = ('from_user', 'from_chat', 'from_group', 'chat_id')
+    __slots__ = ('from_user', 'from_chat', 'from_group', 'chat_id', 'peer_id')
 
     def __init__(self, raw):
         super(VkBotMessageEvent, self).__init__(raw)
@@ -168,16 +173,24 @@ class VkBotMessageEvent(VkBotEvent):
         self.from_group = False
         self.chat_id = None
 
-        peer_id = self.obj.peer_id or self.message.peer_id
+        self.peer_id = self.obj.peer_id or self.message.peer_id
 
-        if peer_id < 0:
+        if self.peer_id < 0:
             self.from_group = True
-        elif peer_id < CHAT_START_ID:
+        elif self.peer_id < CHAT_START_ID:
             self.from_user = True
         else:
             self.from_chat = True
-            self.chat_id = peer_id - CHAT_START_ID
+            self.chat_id = self.peer_id - CHAT_START_ID
 
+    async def answer(self, text: str, keyboard: VkKeyboard = None):
+        params = {
+            "group_id": self.group_id,
+            "peer_id": self.peer_id,
+            "message": text,
+            "random_id": 0,
+        }
+        await self.vk.method("messages.send", params)
 
 class VkBotLongPoll(object):
     """ Класс для работы с Bots Long Poll сервером
