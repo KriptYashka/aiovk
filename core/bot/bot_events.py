@@ -3,7 +3,7 @@ from typing import Optional
 
 from core.limits import VkLimits
 from core.vk_api import VkApi
-from keyboards.keyboards import VkKeyboard
+from core.keyboards.keyboards import VkKeyboard
 
 
 class DotDict(dict):
@@ -179,4 +179,7 @@ class VkBotMessageEvent(VkBotEvent):
             "message": text,
             "random_id": 0,
         }
+        if keyboard:
+            params['keyboard'] = keyboard.get_keyboard()
+
         await self.vk.method("messages.send", params)

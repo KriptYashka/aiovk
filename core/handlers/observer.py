@@ -1,3 +1,6 @@
+import logging
+import sys
+import traceback
 from typing import Callable, Any, Optional
 
 from core.handlers.base_filter import Filter
@@ -68,7 +71,14 @@ class EventObserver:
             result, data = await handler.check(event, **kwargs)
             if result:
                 kwargs.update(data)
-                return await handler.call(event, *args, **kwargs)
+                try:
+                    await handler.call(event, *args, **kwargs)
+                    return ResponseStatus.HANDLED
+                except Exception as e:
+                   logging.exception("Exception while handling event: %s", e)
+                   traceback.print_exc(limit=5)
+                   return ResponseStatus.REJECTED
+
 
         return ResponseStatus.UNHANDLED
 
