@@ -8,7 +8,7 @@ class Config:
 
     def __new__(cls):
         if cls._instance is None:
-            load_dotenv()
+            load_dotenv("examples/hello_world/.env")
             cls._instance = super().__new__(cls)
             cls._instance.proxy = os.getenv("PROXY_URL")
             cls._instance.token = os.getenv("TOKEN")

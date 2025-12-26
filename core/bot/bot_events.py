@@ -1,3 +1,4 @@
+import json
 from enum import Enum
 from typing import Optional
 
@@ -105,7 +106,7 @@ class VkBotEvent(object):
         't', 'type',
         'obj', 'object',
         'client_info', 'message',
-        'group_id', 'vk'
+        'group_id', 'vk', 'peer_id',
     )
 
     def __init__(self, raw):
@@ -125,12 +126,40 @@ class VkBotEvent(object):
         except KeyError:
             self.message = None
         self.obj = self.object
+        self.peer_id = self.obj.peer_id
+
         try:
             self.client_info = DotDict(raw['object']['client_info'])
         except KeyError:
             self.client_info = None
 
         self.group_id = raw['group_id']
+
+    async def event_answer(self):
+        """
+        Отправляет событие с действием, которое произойдет при нажатии на callback-кнопку.
+        """
+        params = {
+            "event_id": self.object.event_id,
+            "user_id": self.object.user_id,
+            "peer_id": self.object.peer_id,
+        }
+        await self.vk.method("messages.sendMessageEventAnswer", params)
+
+    async def answer(self, text: str, keyboard: VkKeyboard = None):
+        """
+        Метод отправляет сообщение.
+        """
+        params = {
+            "group_id": self.group_id,
+            "peer_id": self.peer_id,
+            "message": text,
+            "random_id": 0,
+        }
+        if keyboard:
+            params['keyboard'] = keyboard.get_keyboard()
+
+        await self.vk.method("messages.send", params)
 
     def __repr__(self):
         return f'<{type(self)}({self.raw})>'
@@ -171,15 +200,3 @@ class VkBotMessageEvent(VkBotEvent):
         else:
             self.from_chat = True
             self.chat_id = self.peer_id - VkLimits.CHAT_START_ID
-
-    async def answer(self, text: str, keyboard: VkKeyboard = None):
-        params = {
-            "group_id": self.group_id,
-            "peer_id": self.peer_id,
-            "message": text,
-            "random_id": 0,
-        }
-        if keyboard:
-            params['keyboard'] = keyboard.get_keyboard()
-
-        await self.vk.method("messages.send", params)
