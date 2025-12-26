@@ -200,3 +200,8 @@ class VkBotMessageEvent(VkBotEvent):
         else:
             self.from_chat = True
             self.chat_id = self.peer_id - VkLimits.CHAT_START_ID
+
+class VkBotCallbackEvent(VkBotEvent):
+    def __init__(self, raw):
+        super(VkBotCallbackEvent, self).__init__(raw)
+        self.payload = self.object.payload

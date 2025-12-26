@@ -10,7 +10,7 @@ import logging
 import aiohttp
 from aiohttp.web_exceptions import HTTPError
 
-from core.bot.bot_events import VkBotEventType, VkBotEvent, VkBotMessageEvent
+from core.bot.bot_events import VkBotEventType, VkBotEvent, VkBotMessageEvent, VkBotCallbackEvent
 
 CHAT_START_ID = int(2E9)
 
@@ -36,6 +36,7 @@ class VkBotLongPoll(object):
         VkBotEventType.MESSAGE_NEW.value: VkBotMessageEvent,
         VkBotEventType.MESSAGE_REPLY.value: VkBotMessageEvent,
         VkBotEventType.MESSAGE_EDIT.value: VkBotMessageEvent,
+        VkBotEventType.MESSAGE_EVENT.value: VkBotCallbackEvent,
     }
 
     #: Класс для событий
