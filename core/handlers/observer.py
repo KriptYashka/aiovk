@@ -30,7 +30,7 @@ class EventObserver:
     def register(
             self,
             callback: CallbackType,
-            *filters: CallbackType,
+            *filters: CallbackType | bool,
             flags: Optional[dict[str, Any]] = None,
             **kwargs: Any,
     ) -> CallbackType:
