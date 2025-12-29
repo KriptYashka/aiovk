@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Final, Generator, List, Optional
 
-from core.bot.bot_events import VkBotEventType, VkBotEvent
+from core.bot.bot_events import VkBotEvent, VkBotEventType
 from core.handlers.observer import EventObserver
 from core.handlers.responce import ResponseStatus
 

@@ -1,4 +1,5 @@
 import json
+
 from enum import Enum
 
 MAX_BUTTONS_ON_LINE = 5

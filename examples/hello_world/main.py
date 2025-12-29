@@ -3,10 +3,11 @@ import logging
 
 from config import Config
 
-from core.bot.bot_longpool import VkBotLongPoll
 from core.bot.bot_events import VkBotEvent
-from examples.hello_world.dispatcher import dispatcher
+from core.bot.bot_longpool import VkBotLongPoll
 from core.vk_api import VkApi
+from examples.hello_world.dispatcher import dispatcher
+
 
 async def main():
     logging.basicConfig(level=logging.DEBUG)

@@ -1,10 +1,9 @@
-import json
 from enum import Enum
 from typing import Optional
 
+from core.keyboards.keyboards import VkKeyboard
 from core.limits import VkLimits
 from core.vk_api import VkApi
-from core.keyboards.keyboards import VkKeyboard
 
 
 class DotDict(dict):
@@ -200,6 +199,7 @@ class VkBotMessageEvent(VkBotEvent):
         else:
             self.from_chat = True
             self.chat_id = self.peer_id - VkLimits.CHAT_START_ID
+
 
 class VkBotCallbackEvent(VkBotEvent):
     def __init__(self, raw):

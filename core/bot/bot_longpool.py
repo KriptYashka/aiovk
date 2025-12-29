@@ -1,16 +1,10 @@
-# -*- coding: utf-8 -*-
-"""
-:authors: deker104, python273
-:license: Apache License, Version 2.0, see LICENSE file
-
-:copyright: (c) 2019 python273
-"""
 import logging
 
 import aiohttp
+
 from aiohttp.web_exceptions import HTTPError
 
-from core.bot.bot_events import VkBotEventType, VkBotEvent, VkBotMessageEvent, VkBotCallbackEvent
+from core.bot.bot_events import VkBotCallbackEvent, VkBotEvent, VkBotEventType, VkBotMessageEvent
 
 CHAT_START_ID = int(2E9)
 

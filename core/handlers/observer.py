@@ -1,14 +1,16 @@
 import logging
 import sys
 import traceback
-from typing import Callable, Any, Optional
 
-from core.handlers.base_filter import Filter
-from core.handlers.handler import HandlerObject, FilterObject
+from typing import Any, Callable, Optional
+
 from core.bot.bot_events import VkBotEvent
+from core.handlers.base_filter import Filter
+from core.handlers.handler import FilterObject, HandlerObject
 from core.handlers.responce import ResponseStatus
 
 CallbackType = Callable[..., Any]  # Повторяется 2 раза в проекте
+
 
 class EventObserver:
     def __init__(self) -> None:
@@ -75,10 +77,9 @@ class EventObserver:
                     await handler.call(event, *args, **kwargs)
                     return ResponseStatus.HANDLED
                 except Exception as e:
-                   logging.exception("Exception while handling event: %s", e)
-                   traceback.print_exc(limit=5)
-                   return ResponseStatus.REJECTED
-
+                    logging.exception("Exception while handling event: %s", e)
+                    traceback.print_exc(limit=5)
+                    return ResponseStatus.REJECTED
 
         return ResponseStatus.UNHANDLED
 

@@ -1,9 +1,8 @@
 import asyncio
 import inspect
-import warnings
 from dataclasses import dataclass, field
 from functools import partial
-from typing import Callable, Any
+from typing import Any, Callable
 
 from magic_filter import MagicFilter
 
