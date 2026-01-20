@@ -5,6 +5,7 @@ import aiohttp
 from aiohttp.web_exceptions import HTTPError
 
 from core.bot.bot_events import VkBotCallbackEvent, VkBotEvent, VkBotEventType, VkBotMessageEvent
+from core.vk_api import VkApi
 
 CHAT_START_ID = int(2E9)
 
@@ -37,7 +38,7 @@ class VkBotLongPoll(object):
     DEFAULT_EVENT_CLASS = VkBotEvent
 
     def __init__(self, vk, group_id, wait=25):
-        self.vk = vk
+        self.vk: VkApi = vk
         self.group_id = group_id
         self.wait = wait
 

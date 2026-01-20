@@ -158,7 +158,7 @@ class VkBotEvent(object):
         if keyboard:
             params['keyboard'] = keyboard.get_keyboard()
 
-        await self.vk.method("messages.send", params)
+        return await self.vk.method("messages.send", params)
 
     def __repr__(self):
         return f'<{type(self)}({self.raw})>'
