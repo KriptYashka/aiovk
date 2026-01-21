@@ -28,10 +28,14 @@ class VkApi:
 
     async def method(self, method: str, params: dict):
         await self._delay()
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+
         url = "https://api.vk.com/method/" + method
         params['access_token'] = self.token
         params['v'] = self.v
-        async with self.session.post(url, params=params, proxy=self.proxy) as response:
+        async with self.session.post(url, headers=headers, data=params, proxy=self.proxy) as response:
             return await response.json()
 
     async def send(self, url: str, params: dict, wait: int = 25):
