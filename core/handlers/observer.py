@@ -1,7 +1,5 @@
 import logging
-import sys
 import traceback
-
 from typing import Any, Callable, Optional
 
 from core.bot.bot_events import VkBotEvent

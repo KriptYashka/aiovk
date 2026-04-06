@@ -73,7 +73,9 @@ class VkKeyboard(object):
 
     def get_keyboard(self):
         """ Получить json клавиатуры """
-        return sjson_dumps(self.keyboard)
+        cleared_kb = self.keyboard.copy()
+        cleared_kb['buttons'] = [line for line in self.lines if len(line) > 0]
+        return sjson_dumps(cleared_kb)
 
     @classmethod
     def get_empty_keyboard(cls):
@@ -83,6 +85,18 @@ class VkKeyboard(object):
         keyboard = cls()
         keyboard.keyboard['buttons'] = []
         return keyboard.get_keyboard()
+
+    def get_line(self):
+        if len(self.lines[-1]) >= MAX_BUTTONS_ON_LINE:
+            self.lines.append([])
+
+        # if self.inline:
+        #     if len(self.lines) >= MAX_INLINE_LINES:
+        #         raise ValueError(f'Max {MAX_INLINE_LINES} lines for inline keyboard')
+        # elif len(self.lines) >= MAX_DEFAULT_LINES:
+        #     raise ValueError(f'Max {MAX_DEFAULT_LINES} lines for default keyboard')
+
+        return self.lines[-1]
 
     def add_button(self, label, color=VkKeyboardColor.SECONDARY, payload=None):
         """ Добавить кнопку с текстом.
@@ -96,7 +110,7 @@ class VkKeyboard(object):
         :type payload: str or list or dict
         """
 
-        current_line = self.lines[-1]
+        current_line = self.get_line()
 
         if len(current_line) >= MAX_BUTTONS_ON_LINE:
             raise ValueError(f'Max {MAX_BUTTONS_ON_LINE} buttons on a line')
@@ -132,7 +146,7 @@ class VkKeyboard(object):
         :type payload: str or list or dict
         """
 
-        current_line = self.lines[-1]
+        current_line = self.get_line()
 
         if len(current_line) >= MAX_BUTTONS_ON_LINE:
             raise ValueError(f'Max {MAX_BUTTONS_ON_LINE} buttons on a line')
@@ -164,7 +178,7 @@ class VkKeyboard(object):
         :type payload: str or list or dict
         """
 
-        current_line = self.lines[-1]
+        current_line = self.get_line()
 
         if len(current_line) != 0:
             raise ValueError(
@@ -194,7 +208,7 @@ class VkKeyboard(object):
         :type payload: str or list or dict
         """
 
-        current_line = self.lines[-1]
+        current_line = self.get_line()
 
         if len(current_line) != 0:
             raise ValueError(
@@ -232,7 +246,7 @@ class VkKeyboard(object):
         :type payload: str or list or dict
         """
 
-        current_line = self.lines[-1]
+        current_line = self.get_line()
 
         if len(current_line) != 0:
             raise ValueError(
@@ -266,7 +280,7 @@ class VkKeyboard(object):
         :param payload: Параметр для callback api
         :type payload: str or list or dict
         """
-        current_line = self.lines[-1]
+        current_line = self.get_line()
 
         if len(current_line) >= MAX_BUTTONS_ON_LINE:
             raise ValueError(f'Max {MAX_BUTTONS_ON_LINE} buttons on a line')
@@ -291,10 +305,10 @@ class VkKeyboard(object):
                Стандартное отображение - MAX_DEFAULT_LINES;
                Inline-отображение - MAX_INLINE_LINES.
         """
-        if self.inline:
-            if len(self.lines) >= MAX_INLINE_LINES:
-                raise ValueError(f'Max {MAX_INLINE_LINES} lines for inline keyboard')
-        elif len(self.lines) >= MAX_DEFAULT_LINES:
-            raise ValueError(f'Max {MAX_DEFAULT_LINES} lines for default keyboard')
+        # if self.inline:
+        #     if len(self.lines) >= MAX_INLINE_LINES:
+        #         raise ValueError(f'Max {MAX_INLINE_LINES} lines for inline keyboard')
+        # elif len(self.lines) >= MAX_DEFAULT_LINES:
+        #     raise ValueError(f'Max {MAX_DEFAULT_LINES} lines for default keyboard')
 
         self.lines.append([])

@@ -1,3 +1,4 @@
+import json
 from enum import Enum
 from typing import Optional
 
@@ -134,7 +135,7 @@ class VkBotEvent(object):
 
         self.group_id = raw['group_id']
 
-    async def event_answer(self):
+    async def event_answer(self, text: Optional[str] = None):
         """
         Отправляет событие с действием, которое произойдет при нажатии на callback-кнопку.
         """
@@ -143,9 +144,15 @@ class VkBotEvent(object):
             "user_id": self.object.user_id,
             "peer_id": self.object.peer_id,
         }
+
+        if text:
+            params["event_data"] = json.dumps({
+                "type": "show_snackbar",
+                "text": text,
+            }, ensure_ascii=False)
         await self.vk.method("messages.sendMessageEventAnswer", params)
 
-    async def answer(self, text: str, keyboard: VkKeyboard = None):
+    async def answer(self, text: str, keyboard: Optional[VkKeyboard] = None):
         """
         Метод отправляет сообщение.
         """
@@ -158,7 +165,7 @@ class VkBotEvent(object):
         if keyboard:
             params['keyboard'] = keyboard.get_keyboard()
 
-        return await self.vk.method("messages.send", params)
+        await self.vk.method("messages.send", params)
 
     def __repr__(self):
         return f'<{type(self)}({self.raw})>'
@@ -200,8 +207,12 @@ class VkBotMessageEvent(VkBotEvent):
             self.from_chat = True
             self.chat_id = self.peer_id - VkLimits.CHAT_START_ID
 
+    def __getitem__(self, item):
+        return getattr(self, item, None)
+
 
 class VkBotCallbackEvent(VkBotEvent):
     def __init__(self, raw):
         super(VkBotCallbackEvent, self).__init__(raw)
         self.payload = self.object.payload
+        self.message_id = self.object.conversation_message_id

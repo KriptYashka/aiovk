@@ -78,14 +78,15 @@ class Router:
             return await self._propagate_event(
                 observer=observer, update_type=update_type, event=event, **data
             )
+
         return await _wrapped(event, **kwargs)
 
     async def _propagate_event(
-        self,
-        observer: Optional[EventObserver],
-        update_type: str,
-        event: VkBotEvent,
-        **kwargs: Any,
+            self,
+            observer: Optional[EventObserver],
+            update_type: str,
+            event: VkBotEvent,
+            **kwargs: Any,
     ) -> Any:
         response = ResponseStatus.UNHANDLED
         if observer:

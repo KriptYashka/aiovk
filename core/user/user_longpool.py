@@ -1,9 +1,7 @@
 import logging
-
 from collections import defaultdict
 
 import aiohttp
-
 from aiohttp.web_exceptions import HTTPError
 
 from core.user.user_events import DEFAULT_MODE, Event, VkEventType, VkLongpollMode
