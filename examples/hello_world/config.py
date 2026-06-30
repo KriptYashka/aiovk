@@ -12,7 +12,6 @@ class Config:
             cls._instance = super().__new__(cls)
             cls._instance.proxy = os.getenv("PROXY_URL")
             cls._instance.token = os.getenv("TOKEN")
-            cls._instance.group_id = os.getenv("GROUP_ID")
         return cls._instance
 
     def __init__(self):

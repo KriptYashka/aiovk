@@ -4,7 +4,7 @@ import logging
 from config import Config
 
 from core.bot.bot_events import VkBotEvent
-from core.bot.bot_longpool import VkBotLongPoll
+from core.bot.bot_longpoll import VkBotLongPoll
 from core.vk_api import VkApi
 from examples.hello_world.dispatcher import dispatcher
 
@@ -15,12 +15,10 @@ async def main():
     vk = VkApi(
         config.token,
         config.proxy,
-        '5.199'
+        '5.199',
+        is_group_token=True,
     )
-    server = VkBotLongPoll(
-        vk,
-        group_id=config.group_id
-    )
+    server = VkBotLongPoll(vk)
     await server.update_longpoll_server()
     while True:
         events: list[VkBotEvent] = await server.get_events()
